@@ -38,14 +38,14 @@ export function Wholesale() {
             <Link to="/productos"><Button variant="secondary">{t('pages.wholesale.viewCatalog')}</Button></Link>
           </div>
         </div>
-        <Card className="p-8 bg-ink-950 text-ivory-100 border-none">
+        <div className="p-8 bg-ink-950 text-ivory-100 rounded-md">
           <p className="font-display text-xl mb-4">{t('pages.wholesale.howItWorks')}</p>
           <ol className="space-y-4 text-sm text-ivory-300">
             <li><span className="text-gold-400 font-medium">1.</span> {t('pages.wholesale.step1')}</li>
             <li><span className="text-gold-400 font-medium">2.</span> {t('pages.wholesale.step2')}</li>
             <li><span className="text-gold-400 font-medium">3.</span> {t('pages.wholesale.step3')}</li>
           </ol>
-        </Card>
+        </div>
       </div>
     </div>
   );

@@ -105,11 +105,11 @@ export function Home() {
 
       {/* AUDIENCIAS */}
       <section className="max-w-7xl mx-auto px-5 md:px-8 py-16">
-        <Card className="bg-ink-950 text-ivory-50 border-none p-10 md:p-14 text-center">
+        <div className="bg-ink-950 text-ivory-50 rounded-md p-10 md:p-14 text-center">
           <p className="font-display text-2xl md:text-3xl mb-3">{t('pages.home.audienceTitle')}</p>
           <p className="text-ivory-300 max-w-xl mx-auto mb-8">{t('pages.home.audienceDesc')}</p>
           <Link to="/distribuidores"><Button size="lg">{t('pages.home.requestDistributor')}</Button></Link>
-        </Card>
+        </div>
       </section>
 
       {/* DISTRIBUIDORES CTA */}
