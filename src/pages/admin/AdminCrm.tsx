@@ -3,11 +3,15 @@ import { listLeads, moveLeadStage, addLeadNote } from '../../services/api';
 import { SectionHeading, Modal, inputClass, Button } from '../../components/ui/primitives';
 import type { CrmLead, CrmStage } from '../../types';
 import { useApp } from '../../store/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { CRM_STAGE_LABEL, labelFor } from '../../i18n/statusLabels';
 
 const STAGES: CrmStage[] = ['NUEVO LEAD', 'CONTACTADO', 'INTERESADO', 'COTIZACIÓN', 'NEGOCIACIÓN', 'CLIENTE'];
 
 export function AdminCrm() {
   const { showToast } = useApp();
+  const { t, lang } = useLanguage();
+  const locale = lang === 'en' ? 'en-US' : 'es-MX';
   const [leads, setLeads] = useState<CrmLead[]>([]);
   const [selected, setSelected] = useState<CrmLead | null>(null);
   const [note, setNote] = useState('');
@@ -21,7 +25,7 @@ export function AdminCrm() {
     await moveLeadStage(dragId, stage);
     setDragId(null);
     reload();
-    showToast('Lead movido de etapa', 'success');
+    showToast(t('admin.crm.leadMovedToast'), 'success');
   }
 
   async function submitNote() {
@@ -35,7 +39,7 @@ export function AdminCrm() {
 
   return (
     <div>
-      <SectionHeading title="CRM · Seguimiento comercial" description="Arrastra las tarjetas entre columnas para actualizar la etapa de cada prospecto." />
+      <SectionHeading title={t('admin.crm.title')} description={t('admin.crm.description')} />
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
         {STAGES.map((stage) => (
           <div
@@ -44,7 +48,7 @@ export function AdminCrm() {
             onDrop={() => drop(stage)}
             className="bg-ink-950/[0.03] rounded-md p-2.5 min-h-[420px]"
           >
-            <p className="text-[11px] font-medium text-ink-700 uppercase tracking-wide mb-2.5 px-1">{stage} <span className="text-ink-700/50">({leads.filter((l) => l.stage === stage).length})</span></p>
+            <p className="text-[11px] font-medium text-ink-700 uppercase tracking-wide mb-2.5 px-1">{labelFor(CRM_STAGE_LABEL, stage, lang)} <span className="text-ink-700/50">({leads.filter((l) => l.stage === stage).length})</span></p>
             <div className="space-y-2">
               {leads.filter((l) => l.stage === stage).map((lead) => (
                 <div
@@ -68,20 +72,20 @@ export function AdminCrm() {
         {selected && (
           <div>
             <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-              <div><p className="text-xs text-ink-700">Contacto</p><p className="text-ink-950">{selected.contactName}</p></div>
-              <div><p className="text-xs text-ink-700">Responsable</p><p className="text-ink-950">{selected.owner}</p></div>
-              <div><p className="text-xs text-ink-700">WhatsApp</p><p className="text-ink-950">{selected.whatsapp}</p></div>
-              <div><p className="text-xs text-ink-700">Correo</p><p className="text-ink-950 truncate">{selected.email}</p></div>
-              <div><p className="text-xs text-ink-700">Último contacto</p><p className="text-ink-950">{new Date(selected.lastContactDate).toLocaleDateString('es-MX')}</p></div>
-              <div><p className="text-xs text-ink-700">Próxima acción</p><p className="text-ink-950">{selected.nextAction}</p></div>
+              <div><p className="text-xs text-ink-700">{t('admin.crm.contact')}</p><p className="text-ink-950">{selected.contactName}</p></div>
+              <div><p className="text-xs text-ink-700">{t('admin.crm.owner')}</p><p className="text-ink-950">{selected.owner}</p></div>
+              <div><p className="text-xs text-ink-700">{t('admin.crm.whatsapp')}</p><p className="text-ink-950">{selected.whatsapp}</p></div>
+              <div><p className="text-xs text-ink-700">{t('admin.crm.email')}</p><p className="text-ink-950 truncate">{selected.email}</p></div>
+              <div><p className="text-xs text-ink-700">{t('admin.crm.lastContact')}</p><p className="text-ink-950">{new Date(selected.lastContactDate).toLocaleDateString(locale)}</p></div>
+              <div><p className="text-xs text-ink-700">{t('admin.crm.nextAction')}</p><p className="text-ink-950">{selected.nextAction}</p></div>
             </div>
-            <p className="text-xs font-medium text-ink-700 uppercase mb-2">Notas</p>
+            <p className="text-xs font-medium text-ink-700 uppercase mb-2">{t('admin.crm.notes')}</p>
             <div className="space-y-1.5 mb-3 max-h-32 overflow-y-auto">
               {selected.notes.map((n, i) => <p key={i} className="text-sm bg-ink-950/5 rounded-sm px-3 py-2">{n}</p>)}
             </div>
             <div className="flex gap-2">
-              <input className={inputClass} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Agregar nota..." />
-              <Button onClick={submitNote}>Agregar</Button>
+              <input className={inputClass} value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('admin.crm.addNotePlaceholder')} />
+              <Button onClick={submitNote}>{t('admin.crm.add')}</Button>
             </div>
           </div>
         )}

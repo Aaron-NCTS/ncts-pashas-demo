@@ -4,25 +4,27 @@ import { SectionHeading, Card, Button, Modal } from '../../components/ui/primiti
 import { OrderTimeline } from '../../components/shared/OrderTimeline';
 import type { Order } from '../../types';
 import { useApp } from '../../store/AppContext';
-
-const GROUPS: { title: string; statuses: Order['status'][] }[] = [
-  { title: 'Por preparar', statuses: ['Pedido recibido', 'Pago confirmado'] },
-  { title: 'Empacados', statuses: ['Preparando pedido', 'Empacado'] },
-  { title: 'Listos para envío / en tránsito', statuses: ['Enviado', 'En tránsito', 'En reparto'] },
-  { title: 'Entregados', statuses: ['Entregado'] },
-  { title: 'Incidencia', statuses: ['Incidencia'] },
-];
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export function AdminLogistics() {
   const { showToast } = useApp();
+  const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [prepOrder, setPrepOrder] = useState<Order | null>(null);
   const [detail, setDetail] = useState<Order | null>(null);
 
+  const GROUPS: { title: string; statuses: Order['status'][] }[] = [
+    { title: t('admin.logistics.groupToPrep'), statuses: ['Pedido recibido', 'Pago confirmado'] },
+    { title: t('admin.logistics.groupPacked'), statuses: ['Preparando pedido', 'Empacado'] },
+    { title: t('admin.logistics.groupInTransit'), statuses: ['Enviado', 'En tránsito', 'En reparto'] },
+    { title: t('admin.logistics.groupDelivered'), statuses: ['Entregado'] },
+    { title: t('admin.logistics.groupIncident'), statuses: ['Incidencia'] },
+  ];
+
   function reload() { listOrders().then(setOrders); }
   useEffect(() => { reload(); }, []);
 
-  const grouped = useMemo(() => GROUPS.map((g) => ({ ...g, orders: orders.filter((o) => g.statuses.includes(o.status)) })), [orders]);
+  const grouped = useMemo(() => GROUPS.map((g) => ({ ...g, orders: orders.filter((o) => g.statuses.includes(o.status)) })), [orders, t]);
 
   async function togglePrep(order: Order, key: 'productPrepared' | 'productPacked' | 'orderVerified') {
     const current = order.prep ?? { productPrepared: false, productPacked: false, orderVerified: false };
@@ -34,12 +36,12 @@ export function AdminLogistics() {
     await advanceOrderStatus(order.id);
     setPrepOrder(null);
     reload();
-    showToast(`Pedido ${order.id} listo para envío`, 'success');
+    showToast(t('admin.logistics.readyToShipToast').replace('{id}', order.id), 'success');
   }
 
   return (
     <div>
-      <SectionHeading title="Logística" description="Flujo de almacén, preparación y seguimiento de envíos — datos demostrativos." />
+      <SectionHeading title={t('admin.logistics.title')} description={t('admin.logistics.description')} />
 
       <div className="grid lg:grid-cols-2 gap-6">
         {grouped.map((g) => (
@@ -53,20 +55,20 @@ export function AdminLogistics() {
                     <p className="text-xs text-ink-700">{o.companyName ?? o.customerName} · {o.city}</p>
                   </div>
                   <div className="flex gap-2">
-                    <button onClick={() => setDetail(o)} className="text-xs text-gold-600 hover:underline">Detalle</button>
+                    <button onClick={() => setDetail(o)} className="text-xs text-gold-600 hover:underline">{t('admin.logistics.detail')}</button>
                     {['Pedido recibido', 'Pago confirmado', 'Preparando pedido', 'Empacado'].includes(o.status) && (
-                      <button onClick={() => setPrepOrder(o)} className="text-xs text-ink-700 hover:underline">Preparar</button>
+                      <button onClick={() => setPrepOrder(o)} className="text-xs text-ink-700 hover:underline">{t('admin.logistics.prepare')}</button>
                     )}
                   </div>
                 </div>
               ))}
-              {g.orders.length === 0 && <p className="text-xs text-ink-700/60">Sin pedidos en esta etapa.</p>}
+              {g.orders.length === 0 && <p className="text-xs text-ink-700/60">{t('admin.logistics.noOrdersInStage')}</p>}
             </div>
           </Card>
         ))}
       </div>
 
-      <Modal open={!!prepOrder} onClose={() => setPrepOrder(null)} title={prepOrder ? `Preparar pedido ${prepOrder.id}` : ''}>
+      <Modal open={!!prepOrder} onClose={() => setPrepOrder(null)} title={prepOrder ? `${t('admin.logistics.prepareOrderTitle')} ${prepOrder.id}` : ''}>
         {prepOrder && (
           <div>
             <ul className="text-sm text-ink-700 space-y-1 mb-5">
@@ -74,9 +76,9 @@ export function AdminLogistics() {
             </ul>
             <div className="space-y-3 mb-6">
               {([
-                { key: 'productPrepared', label: 'Producto preparado' },
-                { key: 'productPacked', label: 'Producto empacado' },
-                { key: 'orderVerified', label: 'Pedido verificado' },
+                { key: 'productPrepared', label: t('admin.logistics.productPrepared') },
+                { key: 'productPacked', label: t('admin.logistics.productPacked') },
+                { key: 'orderVerified', label: t('admin.logistics.orderVerified') },
               ] as const).map(({ key, label }) => (
                 <label key={key} className="flex items-center gap-3 text-sm text-ink-950 cursor-pointer">
                   <input type="checkbox" checked={prepOrder.prep?.[key] ?? false} onChange={() => togglePrep(prepOrder, key)} className="w-4 h-4 accent-gold-500" />
@@ -89,23 +91,23 @@ export function AdminLogistics() {
               disabled={!(prepOrder.prep?.productPrepared && prepOrder.prep?.productPacked && prepOrder.prep?.orderVerified)}
               onClick={() => markReadyToShip(prepOrder)}
             >
-              Marcar listo para envío
+              {t('admin.logistics.markReadyToShip')}
             </Button>
           </div>
         )}
       </Modal>
 
-      <Modal open={!!detail} onClose={() => setDetail(null)} title={detail ? `Envío — ${detail.id}` : ''} wide>
+      <Modal open={!!detail} onClose={() => setDetail(null)} title={detail ? `${t('admin.logistics.shipmentTitle')} — ${detail.id}` : ''} wide>
         {detail && (
           <div className="grid md:grid-cols-2 gap-8">
             <div>
-              <p className="text-xs text-ink-700 mb-1">Cliente</p>
+              <p className="text-xs text-ink-700 mb-1">{t('admin.logistics.customer')}</p>
               <p className="text-sm font-medium text-ink-950 mb-4">{detail.companyName ?? detail.customerName}</p>
-              <p className="text-xs text-ink-700 mb-1">Dirección</p>
+              <p className="text-xs text-ink-700 mb-1">{t('admin.logistics.address')}</p>
               <p className="text-sm text-ink-950 mb-4">{detail.address}, {detail.city}, {detail.state}</p>
-              <p className="text-xs text-ink-700 mb-1">Transportista</p>
-              <p className="text-sm text-ink-950 mb-4">{detail.carrier ?? 'Por asignar'}</p>
-              <p className="text-xs text-ink-700 mb-1">Guía</p>
+              <p className="text-xs text-ink-700 mb-1">{t('admin.logistics.carrier')}</p>
+              <p className="text-sm text-ink-950 mb-4">{detail.carrier ?? t('admin.logistics.toBeAssigned')}</p>
+              <p className="text-xs text-ink-700 mb-1">{t('admin.logistics.trackingNumber')}</p>
               <p className="text-sm text-ink-950">{detail.trackingNumber ?? '—'}</p>
             </div>
             <OrderTimeline order={detail} />

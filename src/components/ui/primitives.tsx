@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 // ---------------------------------------------------------------------------
 export function Button({
@@ -55,6 +56,7 @@ export function Skeleton({ className = '' }: { className?: string }) {
 
 // ---------------------------------------------------------------------------
 export function Modal({ open, onClose, title, children, wide }: { open: boolean; onClose: () => void; title: string; children: React.ReactNode; wide?: boolean }) {
+  const { t } = useLanguage();
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink-950/60 backdrop-blur-sm" onClick={onClose}>
@@ -64,7 +66,7 @@ export function Modal({ open, onClose, title, children, wide }: { open: boolean;
       >
         <div className="flex items-center justify-between px-6 py-4 border-b border-ink-950/10 sticky top-0 bg-ivory-50">
           <h3 className="font-display text-lg text-ink-950">{title}</h3>
-          <button onClick={onClose} aria-label="Cerrar" className="text-ink-700 hover:text-ink-950 text-xl leading-none focus-ring rounded-sm px-1">×</button>
+          <button onClick={onClose} aria-label={t('common.close')} className="text-ink-700 hover:text-ink-950 text-xl leading-none focus-ring rounded-sm px-1">×</button>
         </div>
         <div className="p-6">{children}</div>
       </div>

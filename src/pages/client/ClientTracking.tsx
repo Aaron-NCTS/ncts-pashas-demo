@@ -7,9 +7,11 @@ import { OrderTimeline } from '../../components/shared/OrderTimeline';
 import { OrderStatusBadge } from '../../components/ui/StatusBadge';
 import type { Order } from '../../types';
 import { formatCurrency } from '../../config/brand';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export function ClientTracking() {
   const { session } = useApp();
+  const { t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [params, setParams] = useSearchParams();
   const selectedId = params.get('pedido');
@@ -25,12 +27,12 @@ export function ClientTracking() {
   const selected = orders.find((o) => o.id === selectedId);
 
   if (orders.length === 0) {
-    return <div><SectionHeading title="Seguimiento" /><EmptyState title="Sin pedidos activos" message="Realiza un pedido para dar seguimiento a su entrega." /></div>;
+    return <div><SectionHeading title={t('client.tracking.title')} /><EmptyState title={t('client.tracking.emptyTitle')} message={t('client.tracking.emptyMsg')} /></div>;
   }
 
   return (
     <div>
-      <SectionHeading title="Seguimiento de pedidos" />
+      <SectionHeading title={t('client.tracking.title')} />
       <div className="grid md:grid-cols-3 gap-6">
         <Card className="p-3 h-fit md:col-span-1">
           {orders.map((o) => (

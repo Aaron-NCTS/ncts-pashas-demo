@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { listTickets, createTicket } from '../../services/api';
 import { useApp } from '../../store/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { TICKET_CATEGORY_LABEL, labelFor } from '../../i18n/statusLabels';
 import { SectionHeading, Card, Button, Modal, Field, inputClass, EmptyState, Skeleton } from '../../components/ui/primitives';
 import { TicketStatusBadge } from '../../components/ui/StatusBadge';
 import type { SupportTicket, TicketCategory } from '../../types';
@@ -10,6 +12,7 @@ const CATEGORIES: TicketCategory[] = ['Problema con pedido', 'Facturación', 'Pr
 
 export function ClientSupport() {
   const { session, showToast } = useApp();
+  const { t, lang } = useLanguage();
   const [tickets, setTickets] = useState<SupportTicket[] | null>(null);
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<TicketCategory>('Problema con pedido');
@@ -17,39 +20,39 @@ export function ClientSupport() {
   const [message, setMessage] = useState('');
 
   function reload() {
-    listTickets().then((all) => setTickets(all.filter((t) => t.customerName === session?.name)));
+    listTickets().then((all) => setTickets(all.filter((tk) => tk.customerName === session?.name)));
   }
   useEffect(() => { reload(); }, [session]);
 
   async function submit() {
-    if (!subject || !message) { showToast('Completa asunto y mensaje', 'error'); return; }
+    if (!subject || !message) { showToast(t('client.support.fillRequired'), 'error'); return; }
     await createTicket({ customerId: 'cust-guest', customerName: session?.name ?? '', category, subject, message });
     setOpen(false); setSubject(''); setMessage('');
     reload();
-    showToast('Ticket creado', 'success');
+    showToast(t('client.support.createdToast'), 'success');
   }
 
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <SectionHeading title="Soporte" />
-        <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4" /> Nuevo ticket</Button>
+        <SectionHeading title={t('client.support.title')} />
+        <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4" /> {t('client.support.newTicket')}</Button>
       </div>
       {tickets === null ? <Skeleton className="h-64" /> : tickets.length === 0 ? (
-        <EmptyState title="Sin tickets" message="Si tienes algún problema, crea un ticket y te ayudaremos." />
+        <EmptyState title={t('client.support.emptyTitle')} message={t('client.support.emptyMsg')} />
       ) : (
         <div className="grid gap-4">
-          {tickets.map((t) => (
-            <Card key={t.id} className="p-5">
+          {tickets.map((tk) => (
+            <Card key={tk.id} className="p-5">
               <div className="flex items-center justify-between mb-2">
                 <div>
-                  <p className="text-xs text-gold-600 mb-0.5">{t.category} · {t.id}</p>
-                  <p className="font-medium text-ink-950">{t.subject}</p>
+                  <p className="text-xs text-gold-600 mb-0.5">{labelFor(TICKET_CATEGORY_LABEL, tk.category, lang)} · {tk.id}</p>
+                  <p className="font-medium text-ink-950">{tk.subject}</p>
                 </div>
-                <TicketStatusBadge status={t.status} />
+                <TicketStatusBadge status={tk.status} />
               </div>
-              <p className="text-sm text-ink-700">{t.message}</p>
-              {t.replies.map((r, i) => (
+              <p className="text-sm text-ink-700">{tk.message}</p>
+              {tk.replies.map((r, i) => (
                 <div key={i} className="mt-3 bg-ink-950/5 rounded-sm px-3 py-2">
                   <p className="text-xs font-medium text-ink-950">{r.author}</p>
                   <p className="text-sm text-ink-700">{r.message}</p>
@@ -59,15 +62,15 @@ export function ClientSupport() {
           ))}
         </div>
       )}
-      <Modal open={open} onClose={() => setOpen(false)} title="Nuevo ticket de soporte">
-        <Field label="Categoría">
+      <Modal open={open} onClose={() => setOpen(false)} title={t('client.support.modalTitle')}>
+        <Field label={t('client.support.category')}>
           <select className={inputClass} value={category} onChange={(e) => setCategory(e.target.value as TicketCategory)}>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            {CATEGORIES.map((c) => <option key={c} value={c}>{labelFor(TICKET_CATEGORY_LABEL, c, lang)}</option>)}
           </select>
         </Field>
-        <Field label="Asunto"><input className={inputClass} value={subject} onChange={(e) => setSubject(e.target.value)} /></Field>
-        <Field label="Mensaje"><textarea rows={4} className={inputClass} value={message} onChange={(e) => setMessage(e.target.value)} /></Field>
-        <Button onClick={submit} className="w-full">Enviar ticket</Button>
+        <Field label={t('client.support.subject')}><input className={inputClass} value={subject} onChange={(e) => setSubject(e.target.value)} /></Field>
+        <Field label={t('client.support.message')}><textarea rows={4} className={inputClass} value={message} onChange={(e) => setMessage(e.target.value)} /></Field>
+        <Button onClick={submit} className="w-full">{t('client.support.sendTicket')}</Button>
       </Modal>
     </div>
   );

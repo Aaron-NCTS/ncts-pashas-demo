@@ -1,4 +1,5 @@
 import { SectionHeading, Card, Badge } from '../../components/ui/primitives';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 // Proveedores ficticios únicamente para fines de demostración del módulo.
 // Nombres y contactos genéricos, sin relación con proveedores reales de
@@ -11,15 +12,16 @@ const SUPPLIERS = [
 ];
 
 export function AdminSuppliers() {
+  const { t } = useLanguage();
   return (
     <div>
-      <SectionHeading title="Proveedores" description="Directorio de proveedores para reposición de inventario — datos demostrativos." />
+      <SectionHeading title={t('admin.suppliers.title')} description={t('admin.suppliers.description')} />
       <Card className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-ink-950/10 text-left text-xs text-ink-700 uppercase tracking-wide">
-              <th className="px-4 py-3">Proveedor</th><th className="px-4 py-3">Categoría</th><th className="px-4 py-3">Contacto</th>
-              <th className="px-4 py-3">Tiempo de entrega</th><th className="px-4 py-3">Estado</th>
+              <th className="px-4 py-3">{t('admin.suppliers.supplier')}</th><th className="px-4 py-3">{t('admin.suppliers.category')}</th><th className="px-4 py-3">{t('admin.suppliers.contact')}</th>
+              <th className="px-4 py-3">{t('admin.suppliers.leadTime')}</th><th className="px-4 py-3">{t('admin.suppliers.status')}</th>
             </tr>
           </thead>
           <tbody>
@@ -29,14 +31,14 @@ export function AdminSuppliers() {
                 <td className="px-4 py-3 text-ink-700">{s.category}</td>
                 <td className="px-4 py-3 text-ink-700">{s.contact}</td>
                 <td className="px-4 py-3 text-ink-700">{s.leadTime}</td>
-                <td className="px-4 py-3">{s.status === 'Activo' ? <Badge tone="green">Activo</Badge> : <Badge tone="neutral">Inactivo</Badge>}</td>
+                <td className="px-4 py-3">{s.status === 'Activo' ? <Badge tone="green">{t('common.active')}</Badge> : <Badge tone="neutral">{t('common.inactive')}</Badge>}</td>
               </tr>
             ))}
           </tbody>
         </table>
       </Card>
       <p className="text-xs text-ink-700/70 mt-4">
-        Proveedores ficticios con fines demostrativos — no representan proveedores reales de PASHA GROUP.
+        {t('admin.suppliers.note')}
       </p>
     </div>
   );

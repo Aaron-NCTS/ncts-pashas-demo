@@ -4,11 +4,14 @@ import { listOrders, listProducts, listCustomers } from '../../services/api';
 import { SectionHeading, Card, KpiCard } from '../../components/ui/primitives';
 import { salesByMonth, topProducts, salesByCategory, statesBySales, averageDeliveryDays } from '../../utils/analytics';
 import { formatCurrency } from '../../config/brand';
-import type { Order, Product, Customer } from '../../types';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { PRODUCT_CATEGORY_LABEL } from '../../i18n/statusLabels';
+import type { Order, Product, Customer, ProductCategory } from '../../types';
 
 const COLORS = ['#B08D3F', '#100E0C', '#D9BD79', '#5B1A1A', '#3B6EA8', '#4A3D30', '#8C6D2E', '#7A2431'];
 
 export function AdminReports() {
+  const { t, lang } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -17,7 +20,10 @@ export function AdminReports() {
 
   const monthly = useMemo(() => salesByMonth(orders, 8), [orders]);
   const top = useMemo(() => topProducts(orders, 6), [orders]);
-  const byCategory = useMemo(() => salesByCategory(orders, products), [orders, products]);
+  const byCategory = useMemo(() => salesByCategory(orders, products).map((c) => ({
+    ...c,
+    category: PRODUCT_CATEGORY_LABEL[c.category as ProductCategory]?.[lang] ?? t('common.other'),
+  })), [orders, products, lang, t]);
   const byState = useMemo(() => statesBySales(orders), [orders]);
   const delivered = orders.filter((o) => o.status === 'Entregado').length;
   const avgDays = useMemo(() => averageDeliveryDays(orders), [orders]);
@@ -29,18 +35,18 @@ export function AdminReports() {
 
   return (
     <div>
-      <SectionHeading title="Reportes" description="Ventas, productos, clientes, inventario, distribuidores y logística — métricas demostrativas." />
+      <SectionHeading title={t('admin.reports.title')} description={t('admin.reports.description')} />
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <KpiCard label="Pedidos entregados" value={String(delivered)} />
-        <KpiCard label="Tiempo promedio de entrega" value={`${avgDays} días`} />
-        <KpiCard label="Clientes totales" value={String(customers.length)} />
-        <KpiCard label="Distribuidores" value={String(customers.filter((c) => c.isDistributor).length)} />
+        <KpiCard label={t('admin.reports.deliveredOrders')} value={String(delivered)} />
+        <KpiCard label={t('admin.reports.avgDeliveryTime')} value={`${avgDays} ${t('admin.reports.days')}`} />
+        <KpiCard label={t('admin.reports.totalCustomers')} value={String(customers.length)} />
+        <KpiCard label={t('admin.reports.distributors')} value={String(customers.filter((c) => c.isDistributor).length)} />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         <Card className="p-5">
-          <p className="text-sm font-medium text-ink-950 mb-4">Ventas por mes</p>
+          <p className="text-sm font-medium text-ink-950 mb-4">{t('admin.reports.salesByMonth')}</p>
           <ResponsiveContainer width="100%" height={230}>
             <LineChart data={monthly}>
               <CartesianGrid strokeDasharray="3 3" stroke="#22201c1a" />
@@ -52,7 +58,7 @@ export function AdminReports() {
           </ResponsiveContainer>
         </Card>
         <Card className="p-5">
-          <p className="text-sm font-medium text-ink-950 mb-4">Ventas por categoría</p>
+          <p className="text-sm font-medium text-ink-950 mb-4">{t('admin.reports.salesByCategory')}</p>
           <ResponsiveContainer width="100%" height={230}>
             <PieChart>
               <Pie data={byCategory} dataKey="total" nameKey="category" innerRadius={50} outerRadius={85} paddingAngle={2}>
@@ -66,7 +72,7 @@ export function AdminReports() {
 
       <div className="grid lg:grid-cols-2 gap-6 mb-6">
         <Card className="p-5">
-          <p className="text-sm font-medium text-ink-950 mb-4">Productos más vendidos</p>
+          <p className="text-sm font-medium text-ink-950 mb-4">{t('admin.reports.topProducts')}</p>
           <ResponsiveContainer width="100%" height={230}>
             <BarChart data={top} layout="vertical" margin={{ left: 10 }}>
               <XAxis type="number" tick={{ fontSize: 11, fill: '#4A3D30' }} axisLine={false} tickLine={false} />
@@ -77,7 +83,7 @@ export function AdminReports() {
           </ResponsiveContainer>
         </Card>
         <Card className="p-5">
-          <p className="text-sm font-medium text-ink-950 mb-4">Estados con mayores ventas</p>
+          <p className="text-sm font-medium text-ink-950 mb-4">{t('admin.reports.topStates')}</p>
           <ResponsiveContainer width="100%" height={230}>
             <BarChart data={byState}>
               <XAxis dataKey="state" tick={{ fontSize: 10, fill: '#4A3D30' }} axisLine={false} tickLine={false} interval={0} angle={-15} textAnchor="end" height={50} />
@@ -90,7 +96,7 @@ export function AdminReports() {
       </div>
 
       <Card className="p-5">
-        <p className="text-sm font-medium text-ink-950 mb-4">Clientes principales</p>
+        <p className="text-sm font-medium text-ink-950 mb-4">{t('admin.reports.topCustomers')}</p>
         <div className="space-y-2">
           {topCustomers.map((c, i) => (
             <div key={c.name} className="flex items-center gap-3 text-sm">

@@ -5,9 +5,12 @@ import { DistributorStatusBadge } from '../../components/ui/StatusBadge';
 import type { DistributorApplication, Customer, DistributorStatus } from '../../types';
 import { formatCurrency } from '../../config/brand';
 import { useApp } from '../../store/AppContext';
+import { useLanguage } from '../../i18n/LanguageContext';
+import { DISTRIBUTOR_STATUS_LABEL, labelFor } from '../../i18n/statusLabels';
 
 export function AdminDistributors() {
   const { showToast } = useApp();
+  const { t, lang } = useLanguage();
   const [apps, setApps] = useState<DistributorApplication[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
 
@@ -17,26 +20,26 @@ export function AdminDistributors() {
   async function updateStatus(id: string, status: DistributorStatus) {
     await updateDistributorStatus(id, status);
     reload();
-    showToast(`Solicitud actualizada a "${status}"`, 'success');
+    showToast(t('admin.distributors.statusUpdatedToast').replace('{status}', labelFor(DISTRIBUTOR_STATUS_LABEL, status, lang)), 'success');
   }
 
   async function approve(id: string) {
     const app = await approveDistributor(id);
     reload();
-    if (app) showToast(`${app.companyName} aprobado — ahora es el acceso demo "Entrar como Distribuidor"`, 'success');
+    if (app) showToast(t('admin.distributors.approvedToast').replace('{company}', app.companyName), 'success');
   }
 
   return (
     <div>
-      <SectionHeading title="Distribuidores" description="Solicitudes nuevas y red de distribuidores activos — datos demostrativos." />
+      <SectionHeading title={t('admin.distributors.title')} description={t('admin.distributors.description')} />
 
-      <p className="text-sm font-medium text-ink-950 mb-3">Solicitudes recibidas</p>
+      <p className="text-sm font-medium text-ink-950 mb-3">{t('admin.distributors.applicationsReceived')}</p>
       <Card className="overflow-x-auto mb-10">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-ink-950/10 text-left text-xs text-ink-700 uppercase tracking-wide">
-              <th className="px-4 py-3">Empresa</th><th className="px-4 py-3">Contacto</th><th className="px-4 py-3">Ciudad</th>
-              <th className="px-4 py-3">Volumen</th><th className="px-4 py-3">Estado</th><th className="px-4 py-3"></th>
+              <th className="px-4 py-3">{t('admin.distributors.company')}</th><th className="px-4 py-3">{t('admin.distributors.contact')}</th><th className="px-4 py-3">{t('admin.distributors.city')}</th>
+              <th className="px-4 py-3">{t('admin.distributors.volume')}</th><th className="px-4 py-3">{t('admin.distributors.status')}</th><th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody>
@@ -49,24 +52,24 @@ export function AdminDistributors() {
                 <td className="px-4 py-3"><DistributorStatusBadge status={a.status} /></td>
                 <td className="px-4 py-3">
                   <div className="flex gap-2 justify-end">
-                    {a.status !== 'Aprobado' && <Button size="sm" variant="secondary" onClick={() => updateStatus(a.id, 'En revisión')}>En revisión</Button>}
-                    {a.status !== 'Aprobado' && <Button size="sm" onClick={() => approve(a.id)}>Aprobar</Button>}
+                    {a.status !== 'Aprobado' && <Button size="sm" variant="secondary" onClick={() => updateStatus(a.id, 'En revisión')}>{t('admin.distributors.underReview')}</Button>}
+                    {a.status !== 'Aprobado' && <Button size="sm" onClick={() => approve(a.id)}>{t('admin.distributors.approve')}</Button>}
                   </div>
                 </td>
               </tr>
             ))}
-            {apps.length === 0 && <tr><td colSpan={6} className="text-center py-8 text-ink-700">Sin solicitudes pendientes.</td></tr>}
+            {apps.length === 0 && <tr><td colSpan={6} className="text-center py-8 text-ink-700">{t('admin.distributors.noApplications')}</td></tr>}
           </tbody>
         </table>
       </Card>
 
-      <p className="text-sm font-medium text-ink-950 mb-3">Red de distribuidores activos</p>
+      <p className="text-sm font-medium text-ink-950 mb-3">{t('admin.distributors.activeNetwork')}</p>
       <Card className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-ink-950/10 text-left text-xs text-ink-700 uppercase tracking-wide">
-              <th className="px-4 py-3">Empresa</th><th className="px-4 py-3">Ciudad</th><th className="px-4 py-3">Volumen</th>
-              <th className="px-4 py-3">Ventas acumuladas</th><th className="px-4 py-3">Estado</th>
+              <th className="px-4 py-3">{t('admin.distributors.company')}</th><th className="px-4 py-3">{t('admin.distributors.city')}</th><th className="px-4 py-3">{t('admin.distributors.volume')}</th>
+              <th className="px-4 py-3">{t('admin.distributors.accumulatedSales')}</th><th className="px-4 py-3">{t('admin.distributors.status')}</th>
             </tr>
           </thead>
           <tbody>

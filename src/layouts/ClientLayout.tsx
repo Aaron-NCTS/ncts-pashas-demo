@@ -5,20 +5,21 @@ import {
 } from 'lucide-react';
 import { brand } from '../config/brand';
 import { useApp } from '../store/AppContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { PashaGroupBadge } from '../components/public/PashaLogo';
+import { LanguageToggle } from '../components/ui/LanguageToggle';
 
-const NAV = [
-  { to: '/portal', label: 'Resumen', icon: LayoutGrid, end: true },
-  { to: '/portal/pedidos', label: 'Mis pedidos', icon: Package },
-  { to: '/portal/seguimiento', label: 'Seguimiento', icon: MapPinned },
-  { to: '/portal/cotizaciones', label: 'Cotizaciones', icon: FileText },
-  { to: '/portal/facturacion', label: 'Facturación', icon: Receipt },
-  { to: '/portal/favoritos', label: 'Favoritos', icon: Heart },
-  { to: '/portal/perfil', label: 'Perfil', icon: User },
-  { to: '/portal/soporte', label: 'Soporte', icon: LifeBuoy },
-];
-
-function SidebarContent({ onNavigate, logout, navigate }: { onNavigate?: () => void; logout: () => void; navigate: (p: string) => void }) {
+function SidebarContent({ onNavigate, logout, navigate, t }: { onNavigate?: () => void; logout: () => void; navigate: (p: string) => void; t: (k: string) => string }) {
+  const NAV = [
+    { to: '/portal', label: t('clientLayout.nav.summary'), icon: LayoutGrid, end: true },
+    { to: '/portal/pedidos', label: t('clientLayout.nav.myOrders'), icon: Package },
+    { to: '/portal/seguimiento', label: t('clientLayout.nav.tracking'), icon: MapPinned },
+    { to: '/portal/cotizaciones', label: t('clientLayout.nav.quotes'), icon: FileText },
+    { to: '/portal/facturacion', label: t('clientLayout.nav.billing'), icon: Receipt },
+    { to: '/portal/favoritos', label: t('clientLayout.nav.favorites'), icon: Heart },
+    { to: '/portal/perfil', label: t('clientLayout.nav.profile'), icon: User },
+    { to: '/portal/soporte', label: t('clientLayout.nav.support'), icon: LifeBuoy },
+  ];
   return (
     <>
       <div className="h-20 flex items-center gap-3 px-6 border-b border-ivory-100/10 shrink-0">
@@ -43,14 +44,15 @@ function SidebarContent({ onNavigate, logout, navigate }: { onNavigate?: () => v
           </NavLink>
         ))}
       </nav>
-      <div className="p-3 border-t border-ivory-100/10 shrink-0">
+      <div className="p-3 border-t border-ivory-100/10 shrink-0 space-y-2">
+        <LanguageToggle tone="dark" className="w-fit mx-1" />
         <button
           onClick={() => { logout(); navigate('/'); }}
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm text-ivory-300 hover:bg-ivory-100/5 hover:text-ivory-50 focus-ring"
         >
-          <LogOut className="w-4 h-4" strokeWidth={1.6} /> Cerrar sesión
+          <LogOut className="w-4 h-4" strokeWidth={1.6} /> {t('clientLayout.logout')}
         </button>
-        <p className="text-center text-[10px] tracking-wide text-ivory-400/60 pt-2">DEMO COMERCIAL — NOVACORE TECH SOLUTIONS</p>
+        <p className="text-center text-[10px] tracking-wide text-ivory-400/60 pt-2">{t('clientLayout.demoTag')}</p>
       </div>
     </>
   );
@@ -58,6 +60,7 @@ function SidebarContent({ onNavigate, logout, navigate }: { onNavigate?: () => v
 
 export function ClientLayout() {
   const { session, logout } = useApp();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
@@ -66,7 +69,7 @@ export function ClientLayout() {
   return (
     <div className="min-h-screen flex bg-ivory-100">
       <aside className="w-64 shrink-0 bg-ink-950 text-ivory-200 hidden md:flex flex-col">
-        <SidebarContent logout={logout} navigate={navigate} />
+        <SidebarContent logout={logout} navigate={navigate} t={t} />
       </aside>
 
       {mobileNavOpen && (
@@ -74,11 +77,11 @@ export function ClientLayout() {
           <div className="absolute inset-0 bg-ink-950/60" onClick={() => setMobileNavOpen(false)} />
           <aside className="absolute left-0 top-0 bottom-0 w-72 bg-ink-950 text-ivory-200 flex flex-col shadow-2xl">
             <div className="flex items-center justify-end px-3 pt-3">
-              <button onClick={() => setMobileNavOpen(false)} className="p-2 text-ivory-300 hover:text-ivory-50 focus-ring rounded-sm" aria-label="Cerrar menú">
+              <button onClick={() => setMobileNavOpen(false)} className="p-2 text-ivory-300 hover:text-ivory-50 focus-ring rounded-sm" aria-label="Close menu">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <SidebarContent onNavigate={() => setMobileNavOpen(false)} logout={logout} navigate={navigate} />
+            <SidebarContent onNavigate={() => setMobileNavOpen(false)} logout={logout} navigate={navigate} t={t} />
           </aside>
         </div>
       )}
@@ -86,17 +89,20 @@ export function ClientLayout() {
       <div className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-white border-b border-ink-950/10 flex items-center justify-between px-5 md:px-8">
           <div className="flex items-center gap-3">
-            <button onClick={() => setMobileNavOpen(true)} className="md:hidden p-2 -ml-2 text-ink-800 focus-ring rounded-sm" aria-label="Abrir menú">
+            <button onClick={() => setMobileNavOpen(true)} className="md:hidden p-2 -ml-2 text-ink-800 focus-ring rounded-sm" aria-label="Open menu">
               <Menu className="w-5 h-5" />
             </button>
             <div>
-              <p className="text-xs text-ink-700">{session.role === 'distributor' ? 'Portal de distribuidor' : 'Portal de cliente'}</p>
+              <p className="text-xs text-ink-700">{session.role === 'distributor' ? t('clientLayout.distributorPortal') : t('clientLayout.clientPortal')}</p>
               <p className="font-medium text-ink-950 text-sm">{session.companyName ?? session.name}</p>
             </div>
           </div>
-          <button onClick={() => navigate('/')} className="text-xs text-ink-700 hover:text-gold-600 focus-ring rounded-sm px-2 py-1 shrink-0">
-            Ver sitio público →
-          </button>
+          <div className="flex items-center gap-3">
+            <LanguageToggle tone="light" />
+            <button onClick={() => navigate('/')} className="text-xs text-ink-700 hover:text-gold-600 focus-ring rounded-sm px-2 py-1 shrink-0">
+              {t('clientLayout.viewPublicSite')}
+            </button>
+          </div>
         </header>
         <main className="flex-1 p-5 md:p-8 max-w-6xl w-full mx-auto">
           <Outlet />

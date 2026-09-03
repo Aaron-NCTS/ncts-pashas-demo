@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './store/AppContext';
+import { LanguageProvider } from './i18n/LanguageContext';
 import { Toaster } from './components/ui/Toaster';
 
 import { PublicLayout } from './layouts/PublicLayout';
@@ -46,6 +47,7 @@ import { AdminSettings } from './pages/admin/AdminSettings';
 
 export default function App() {
   return (
+    <LanguageProvider>
     <AppProvider>
       <BrowserRouter>
         <Routes>
@@ -99,5 +101,6 @@ export default function App() {
       </BrowserRouter>
       <Toaster />
     </AppProvider>
+    </LanguageProvider>
   );
 }

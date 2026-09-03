@@ -3,21 +3,24 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Menu, X } from 'lucide-react';
 import { brand } from '../config/brand';
 import { useApp } from '../store/AppContext';
+import { useLanguage } from '../i18n/LanguageContext';
 import { PashaLogo } from '../components/public/PashaLogo';
-
-const NAV = [
-  { to: '/', label: 'Inicio' },
-  { to: '/productos', label: 'Productos' },
-  { to: '/mayoreo', label: 'Mayoreo' },
-  { to: '/distribuidores', label: 'Distribuidores' },
-  { to: '/nosotros', label: 'Nosotros' },
-  { to: '/contacto', label: 'Contacto' },
-];
+import { LanguageToggle } from '../components/ui/LanguageToggle';
 
 export function PublicLayout() {
   const { cartCount, session } = useApp();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+
+  const NAV = [
+    { to: '/', label: t('publicLayout.nav.home') },
+    { to: '/productos', label: t('publicLayout.nav.products') },
+    { to: '/mayoreo', label: t('publicLayout.nav.wholesale') },
+    { to: '/distribuidores', label: t('publicLayout.nav.distributors') },
+    { to: '/nosotros', label: t('publicLayout.nav.about') },
+    { to: '/contacto', label: t('publicLayout.nav.contact') },
+  ];
 
   return (
     <div className="min-h-screen flex flex-col bg-ivory-50">
@@ -40,13 +43,14 @@ export function PublicLayout() {
             ))}
           </nav>
           <div className="flex items-center gap-4">
+            <LanguageToggle tone="dark" className="hidden sm:flex" />
             <button
               onClick={() => navigate(session ? (session.role === 'admin' ? '/admin' : '/portal') : '/login')}
               className="hidden md:inline text-sm text-ivory-200 hover:text-gold-300 focus-ring rounded-sm px-1"
             >
-              {session ? (session.role === 'admin' ? 'Panel admin' : 'Mi cuenta') : 'Iniciar sesión'}
+              {session ? (session.role === 'admin' ? t('publicLayout.adminPanel') : t('publicLayout.myAccount')) : t('publicLayout.login')}
             </button>
-            <button onClick={() => navigate('/carrito')} className="relative p-2 focus-ring rounded-sm" aria-label="Carrito">
+            <button onClick={() => navigate('/carrito')} className="relative p-2 focus-ring rounded-sm" aria-label={t('publicLayout.cart')}>
               <ShoppingBag className="w-5 h-5 text-ivory-100" strokeWidth={1.5} />
               {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gold-500 text-ink-950 text-[10px] font-semibold w-4 h-4 rounded-full flex items-center justify-center">
@@ -54,7 +58,7 @@ export function PublicLayout() {
                 </span>
               )}
             </button>
-            <button className="lg:hidden p-2 focus-ring rounded-sm" onClick={() => setOpen((o) => !o)} aria-label="Menú">
+            <button className="lg:hidden p-2 focus-ring rounded-sm" onClick={() => setOpen((o) => !o)} aria-label="Menu">
               {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
@@ -67,8 +71,9 @@ export function PublicLayout() {
               </NavLink>
             ))}
             <NavLink to={session ? (session.role === 'admin' ? '/admin' : '/portal') : '/login'} onClick={() => setOpen(false)} className="text-sm text-gold-400">
-              {session ? 'Mi cuenta' : 'Iniciar sesión'}
+              {session ? t('publicLayout.myAccount') : t('publicLayout.login')}
             </NavLink>
+            <LanguageToggle tone="dark" className="sm:hidden w-fit" />
           </div>
         )}
         <div className="rule-gold" />
@@ -84,18 +89,18 @@ export function PublicLayout() {
             <div className="mb-4">
               <PashaLogo className="h-12 w-auto" />
             </div>
-            <p className="text-sm text-ivory-300 max-w-xs">{brand.legalName} — venta y distribución mayorista de herramientas para barbería y belleza en {brand.country}.</p>
+            <p className="text-sm text-ivory-300 max-w-xs">{brand.legalName} — {t('publicLayout.footer.tagline')} {brand.country}.</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-gold-500 mb-3">Explorar</p>
+            <p className="text-xs uppercase tracking-wide text-gold-500 mb-3">{t('publicLayout.footer.explore')}</p>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/productos" className="hover:text-gold-300">Catálogo completo</Link></li>
-              <li><Link to="/mayoreo" className="hover:text-gold-300">Programa mayorista</Link></li>
-              <li><Link to="/distribuidores" className="hover:text-gold-300">Conviértete en distribuidor</Link></li>
+              <li><Link to="/productos" className="hover:text-gold-300">{t('publicLayout.footer.fullCatalog')}</Link></li>
+              <li><Link to="/mayoreo" className="hover:text-gold-300">{t('publicLayout.footer.wholesaleProgram')}</Link></li>
+              <li><Link to="/distribuidores" className="hover:text-gold-300">{t('publicLayout.footer.becomeDistributor')}</Link></li>
             </ul>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-gold-500 mb-3">Contacto</p>
+            <p className="text-xs uppercase tracking-wide text-gold-500 mb-3">{t('publicLayout.footer.contact')}</p>
             <ul className="space-y-2 text-sm text-ivory-300">
               <li>{brand.contact.phoneDisplay}</li>
               <li>{brand.contact.email}</li>
@@ -103,15 +108,15 @@ export function PublicLayout() {
             </ul>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-wide text-gold-500 mb-3">Acceso</p>
+            <p className="text-xs uppercase tracking-wide text-gold-500 mb-3">{t('publicLayout.footer.access')}</p>
             <ul className="space-y-2 text-sm">
-              <li><Link to="/login" className="hover:text-gold-300">Iniciar sesión</Link></li>
-              <li><Link to="/portal" className="hover:text-gold-300">Portal de clientes</Link></li>
+              <li><Link to="/login" className="hover:text-gold-300">{t('publicLayout.login')}</Link></li>
+              <li><Link to="/portal" className="hover:text-gold-300">{t('publicLayout.footer.clientPortal')}</Link></li>
             </ul>
           </div>
         </div>
         <div className="border-t border-ivory-100/10 py-5 text-center text-xs text-ivory-400">
-          Demo comercial desarrollada por NovaCore Tech Solutions (NCTS) para {brand.legalName}. Datos y precios con fines demostrativos.
+          {t('publicLayout.footer.demoNotice')} {brand.legalName}. {t('publicLayout.footer.demoNoticeSuffix')}
         </div>
       </footer>
     </div>

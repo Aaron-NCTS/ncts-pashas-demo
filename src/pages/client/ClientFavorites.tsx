@@ -7,9 +7,11 @@ import { SectionHeading, Card, EmptyState, Skeleton } from '../../components/ui/
 import { ProductImage } from '../../components/ui/ProductImage';
 import { formatCurrency } from '../../config/brand';
 import type { Product } from '../../types';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 export function ClientFavorites() {
   const { favorites, toggleFavorite, session } = useApp();
+  const { t } = useLanguage();
   const [products, setProducts] = useState<Product[] | null>(null);
   const isWholesale = session?.role === 'distributor';
 
@@ -19,9 +21,9 @@ export function ClientFavorites() {
 
   return (
     <div>
-      <SectionHeading title="Favoritos" description="Productos que has guardado para comprar después." />
+      <SectionHeading title={t('client.favorites.title')} description={t('client.favorites.description')} />
       {products === null ? <Skeleton className="h-64" /> : favProducts.length === 0 ? (
-        <EmptyState title="Sin favoritos" message="Marca productos con el corazón desde su página de detalle para verlos aquí." />
+        <EmptyState title={t('client.favorites.emptyTitle')} message={t('client.favorites.emptyMsg')} />
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
           {favProducts.map((p) => (
@@ -31,7 +33,7 @@ export function ClientFavorites() {
                 <p className="text-sm font-medium text-ink-950 mb-2 leading-snug">{p.name}</p>
                 <div className="mt-auto flex items-center justify-between">
                   <p className="text-sm font-semibold text-ink-950">{formatCurrency(isWholesale ? p.wholesalePrice : p.publicPrice)}</p>
-                  <button onClick={() => toggleFavorite(p.id)} aria-label="Quitar de favoritos" className="text-oxblood-500 focus-ring rounded-sm">
+                  <button onClick={() => toggleFavorite(p.id)} aria-label={t('client.favorites.removeFromFavorites')} className="text-oxblood-500 focus-ring rounded-sm">
                     <Heart className="w-4 h-4 fill-current" />
                   </button>
                 </div>
