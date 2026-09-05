@@ -49,7 +49,7 @@ export default function App() {
   return (
     <LanguageProvider>
     <AppProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={import.meta.env.BASE_URL}>
         <Routes>
           <Route element={<PublicLayout />}>
             <Route path="/" element={<Home />} />
